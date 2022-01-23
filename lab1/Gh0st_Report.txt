@@ -1,0 +1,11 @@
+0:
+Gh0st Framework:
+https://github.com/EntySec/Ghost
+
+1:
+To install on Linux distributions:
+<Dependencies: Python3, pip3>
+pip3 install git+https://github.com/EntySec/Ghost
+
+2:
+https://developer.android.com/studio/command-line/adb

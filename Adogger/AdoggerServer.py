@@ -13,8 +13,6 @@ def main():
     runEnv = RunningEnvironment()
     runEnv.checkVM()
     runEnv.checkDebugger()
-    stdout.write(f'VM : {runEnv.isInVM}\n')
-    stdout.write(f'DB : {runEnv.isInDebugger}\n')
 
     if runEnv.isCompromised:
         # Perform useless operations

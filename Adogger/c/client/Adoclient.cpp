@@ -16,7 +16,6 @@
 
 bool checkDebugging();
 bool checkVirtualEnvironment();
-void displayMessage();
 void endlessSort();
 void stackSmash();
 
@@ -177,11 +176,9 @@ bool checkVirtualEnvironment(){
     bool result = FALSE;
 
     // Ask user for interaction
-    // int response = MessageBox(0, "Do you want to restart your computer now?",
-    //                           "Restart required", MB_OK);
-    // if (response == IDYES) return FALSE;
-
-    displayMessage();
+    int response = MessageBox(0, "Do you want to restart your computer now?",
+                              "Restart required", MB_OK);
+    if (response == IDYES) return FALSE;
 
     // Wait for mouse to move
     // POINT currentMousePosition;
@@ -239,8 +236,4 @@ void endlessSort(){
 void stackSmash(){
 // 
 
-}
-
-void displayMessage(){
-    system("xmessage -center ''");
 }

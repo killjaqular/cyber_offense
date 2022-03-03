@@ -1,4 +1,5 @@
 import sys
+import os
 
 class RunningEnvironment:
     def __init__(self):
@@ -20,13 +21,9 @@ class RunningEnvironment:
 
         return self.isInDebugger
 
-    def getBasePrefixCompat():
-        return getattr(sys, "base_prefix", None) or\
-               getattr(sys, "real_prefix", None) or\
-               sys.prefix
-
     def checkVM(self):
-        self.isInVM = RunningEnvironment.getBasePrefixCompat() != sys.prefix
+        
+
         self.isCompromised = self.isInVM
 
         return self.isInVM

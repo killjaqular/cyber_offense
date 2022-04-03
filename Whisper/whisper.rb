@@ -67,7 +67,7 @@ class MetasploitModule < Msf::Post
         # Get list of .txt files on remote machine in '~' directory
         currentUser = get_env('USER')
         print_good("Current User set to:_> #{currentUser}")
-        print_good("Searching files in:_> /home/#{currentUser}")
+        print_good("Searching files in:_> /home/kali")
         allFiles    = dir("/home/#{currentUser}")
         print_good("Files found:_> #{allFiles}")
 
